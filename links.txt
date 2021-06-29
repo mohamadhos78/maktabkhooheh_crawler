@@ -1,0 +1,23 @@
+# programming & IT
+https://maktabkhooneh.org/api/learn/?types=PLUS&types=MAKTAB&types=HAMAYESH&sorting=new&selected_category=58
+
+# languages
+https://maktabkhooneh.org/learn/?types=PLUS&types=MAKTAB&types=HAMAYESH&sorting=new&selected_category=58&sorting=new
+
+# financial
+https://maktabkhooneh.org/learn/?types=PLUS&types=MAKTAB&types=HAMAYESH&sorting=new&selected_category=35&sorting=new
+
+# Engineering
+https://maktabkhooneh.org/api/learn/?types=PLUS&types=MAKTAB&types=HAMAYESH&sorting=new&selected_category=89
+
+# Sience and Medical
+https://maktabkhooneh.org/api/learn/?types=PLUS&types=MAKTAB&types=HAMAYESH&sorting=new&selected_category=126
+
+# Arts
+https://maktabkhooneh.org/api/learn/?types=PLUS&types=MAKTAB&types=HAMAYESH&sorting=new&selected_category=1
+
+# School
+https://maktabkhooneh.org/api/learn/?types=PLUS&types=MAKTAB&types=HAMAYESH&sorting=new&selected_category=199
+
+# None
+https://maktabkhooneh.org/api/learn/?types=PLUS&types=MAKTAB&types=HAMAYESH&sorting=new&selected_category=null
