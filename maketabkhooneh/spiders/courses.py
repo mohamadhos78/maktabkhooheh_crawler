@@ -1,4 +1,5 @@
 import scrapy, json
+from scrapy.http import Request
 from maketabkhooneh.items import MaketabkhoonehItem
 
 
@@ -6,29 +7,34 @@ class CoursesSpider(scrapy.Spider):
     name = 'courses'
     allowed_domains = ['maktabkhooneh.org']
     start_urls = [
-            # "https://maktabkhooneh.org/api/learn/?types=PLUS&types=MAKTAB&types=HAMAYESH&sorting=new&selected_category=58" ,
-            # "https://maktabkhooneh.org/api/learn/?types=PLUS&types=MAKTAB&types=HAMAYESH&sorting=new&selected_category=54&sorting=new" ,
-            # "https://maktabkhooneh.org/api/learn/?types=PLUS&types=MAKTAB&types=HAMAYESH&sorting=new&selected_category=35&sorting=new" ,
-            # "https://maktabkhooneh.org/api/learn/?types=PLUS&types=MAKTAB&types=HAMAYESH&sorting=new&selected_category=89" ,
-            # "https://maktabkhooneh.org/api/learn/?types=PLUS&types=MAKTAB&types=HAMAYESH&sorting=new&selected_category=126" ,
-            # "https://maktabkhooneh.org/api/learn/?types=PLUS&types=MAKTAB&types=HAMAYESH&sorting=new&selected_category=1" ,
-            # "https://maktabkhooneh.org/api/learn/?types=PLUS&types=MAKTAB&types=HAMAYESH&sorting=new&selected_category=199" ,
-            "https://maktabkhooneh.org/course/%D8%A2%D9%85%D9%88%D8%B2%D8%B4-%D8%B1%D8%A7%DB%8C%DA%AF%D8%A7%D9%86-%D8%A7%D9%85%D9%86%DB%8C%D8%AA-%D8%A7%D9%BE%D9%84%DB%8C%DA%A9%DB%8C%D8%B4%D9%86-mk1222/" ,
+            "https://maktabkhooneh.org/api/learn/?types=PLUS&types=MAKTAB&types=HAMAYESH&sorting=new&selected_category=58" ,
+            "https://maktabkhooneh.org/api/learn/?types=PLUS&types=MAKTAB&types=HAMAYESH&sorting=new&selected_category=54&sorting=new" ,
+            "https://maktabkhooneh.org/api/learn/?types=PLUS&types=MAKTAB&types=HAMAYESH&sorting=new&selected_category=35&sorting=new" ,
+            "https://maktabkhooneh.org/api/learn/?types=PLUS&types=MAKTAB&types=HAMAYESH&sorting=new&selected_category=89" ,
+            "https://maktabkhooneh.org/api/learn/?types=PLUS&types=MAKTAB&types=HAMAYESH&sorting=new&selected_category=126" ,
+            "https://maktabkhooneh.org/api/learn/?types=PLUS&types=MAKTAB&types=HAMAYESH&sorting=new&selected_category=1" ,
+            "https://maktabkhooneh.org/api/learn/?types=PLUS&types=MAKTAB&types=HAMAYESH&sorting=new&selected_category=199" ,
+            # "https://maktabkhooneh.org/course/%D8%A2%D9%85%D9%88%D8%B2%D8%B4-%D8%B1%D8%A7%DB%8C%DA%AF%D8%A7%D9%86-%D8%A7%D9%85%D9%86%DB%8C%D8%AA-%D8%A7%D9%BE%D9%84%DB%8C%DA%A9%DB%8C%D8%B4%D9%86-mk1222/" ,
         ]
 
     custom_settings = {
-        "LOG_LEVEL" : "WARNING"
+        "LOG_LEVEL" : "WARNING" ,
+        "CLOSESPIDER_ITEMCOUNT" : 100 ,
     }
 
     def parse(self, response):
         last_page = response.xpath('/html/body/div[4]/div/div/div/a[last()]/text()').get()
         print(response.url)
         courses = response.xpath('/html/body/div[2]/div/div/a/@href').getall()
-        print(f"\n\n\t{last_page}\n\n")
+        # yield(f"\n\n\t{last_page}\n\n")
         for course in courses:
-            print(f"\n\n\t{'https://maktabkhooneh.org'+course[2:-2]}\n\n")
+            # print(f"\n\n\t{'https://maktabkhooneh.org'+course[2:-2]}\n\n")
+            yield Request(
+                'https://maktabkhooneh.org'+course[2:-2],
+                callback=self.extract
+                )
     
-    def course_extractor(self, response):
+    def extract(self, response):
         course = MaketabkhoonehItem()
         # title = response.xpath('//h1[@class="course-intro__title"]/text()').get()
         # teacher = response.xpath('//div[@class="teacher-information js-collapsible__title"]/div[@class="ellipsis"]/text()').get()
@@ -45,24 +51,31 @@ class CoursesSpider(scrapy.Spider):
         
 
         course["price"] = {
-            "price" : response.xpath('//meta[@name="price"]/@content').get()
-            "full_content_access" : more_json["offers"]["price"] ,
-            "date" : more_json["offers"]["priceValidUntil"][0]
+            "price" : response.xpath('//meta[@name="price"]/@content').get() ,
+            "full_access_price" : more_json["offers"]["price"] ,
+            "full_access_date" : more_json["offers"]["priceValidUntil"][0]
             }
         course["info"] = {
             "title" : info_json["name"] ,
             "url" : info_json["url"] ,
             "image" : info_json["image"] ,
-            "description" : course["description"] = info_json["description"] 
+            "description" : info_json["description"] 
             }
-        course["teacher"] = info_json["author"]["name"]
+        course["teacher"] = {
+            "name" : info_json["author"]["name"] ,
+            "resume" : " ".join(response.xpath('//div[@class="filler--padded rich-text"]/p/text()').getall()) ,
+            }
+        course["time"] = {
+            "required_time" : response.xpath('//div[@class="course-information"][1]/div[2]/text()').get() ,
+            "access_limaitaion" : response.xpath('//div[@class="course-information"][2]/div[2]/text()').get()
+        }
         course["organization"] = {
             "name" : info_json["provider"]["name"] ,
             "email" : info_json["provider"]["email"]
             }
         course["_id"] = more_json["productID"]
         course["category"] = category_json["itemListElement"][1]["item"]["name"]
-        print("\n\n",course,"\n\n")
+        # print("\n\n",course,"\n\n")
 
         # course = {
         #     "title" : title ,
@@ -72,5 +85,5 @@ class CoursesSpider(scrapy.Spider):
         #     "sessions_title" : sessions_title ,
         #     "sessions" : sessions ,
         # }
-        # yield course
+        return course
         
