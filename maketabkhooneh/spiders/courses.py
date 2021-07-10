@@ -19,7 +19,7 @@ class CoursesSpider(scrapy.Spider):
 
     custom_settings = {
         "LOG_LEVEL" : "WARNING" ,
-        "CLOSESPIDER_ITEMCOUNT" : 100 ,
+        # "CLOSESPIDER_ITEMCOUNT" : 100 ,
     }
 
     def parse(self, response):
@@ -33,6 +33,18 @@ class CoursesSpider(scrapy.Spider):
                 'https://maktabkhooneh.org'+course[2:-2],
                 callback=self.extract
                 )
+        for i in range(1,int(last_page)):
+            yield Request(
+                'https://maktabkhooneh.org'+course[2:-2]+f"&p={i+1}",
+                callback=self.extract
+                )
+        # Next Page
+        if "p=" not in response.url:
+             for i in range(int(last_page)):
+                yield Request(
+                    response.url+f"&p={i+1}",
+                    callback=self.parse
+                    )
     
     def extract(self, response):
         course = MaketabkhoonehItem()
