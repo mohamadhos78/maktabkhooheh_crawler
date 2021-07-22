@@ -13,6 +13,10 @@ SPIDER_MODULES = ['maketabkhooneh.spiders']
 NEWSPIDER_MODULE = 'maketabkhooneh.spiders'
 LOG_FILE = "app.log"
 
+# Out Put
+'FEED_URI': 'maktabkhooneh.json',
+'FEED_FORMAT': 'json',
+
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = 'maketabkhooneh (+http://www.yourdomain.com)'
 
