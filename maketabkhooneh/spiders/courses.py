@@ -24,27 +24,23 @@ class CoursesSpider(scrapy.Spider):
 
     def parse(self, response):
         last_page = response.xpath('/html/body/div[4]/div/div/div/a[last()]/text()').get()
-        print(response.url)
+        next_page = response.xpath('/html/body/div[1]/div/div/a[2]/@href').get()
         courses = response.xpath('/html/body/div[2]/div/div/a/@href').getall()
         # yield(f"\n\n\t{last_page}\n\n")
         for course in courses:
-            # print(f"\n\n\t{'https://maktabkhooneh.org'+course[2:-2]}\n\n")
             yield Request(
                 'https://maktabkhooneh.org'+course[2:-2],
                 callback=self.extract
                 )
-        for i in range(1,int(last_page)):
-            yield Request(
-                'https://maktabkhooneh.org'+course[2:-2]+f"&p={i+1}",
-                callback=self.extract
-                )
+
         # Next Page
-        if "p=" not in response.url:
-             for i in range(int(last_page)):
+        if next_page:
+            #  for i in range(int(last_page)):
                 yield Request(
-                    response.url+f"&p={i+1}",
+                    response.urljoin(next_page[2:-2]),
                     callback=self.parse
                     )
+                # print(response.urljoin(next_page[2:-2]))
     
     def extract(self, response):
         course = MaketabkhoonehItem()
