@@ -5,9 +5,26 @@
 
 
 # useful for handling different item types with a single interface
-from itemadapter import ItemAdapter
+from maketabkhooneh import settings
+import pymongo
+from pymongo.errors import DuplicateKeyError
 
 
 class MaketabkhoonehPipeline:
+    def __init__(self):
+        connection = pymongo.MongoClient(
+            settings.MONGODB_SERVER,
+            settings.MONGODB_PORT
+        )
+        db = connection[settings.MONGODB_DB]
+        self.collection = db[settings.MONGODB_COLLECTION]
+
     def process_item(self, item, spider):
-        return item
+        try:
+            self.collection.insert(dict(item))
+        except DuplicateKeyError:
+            print('duplicate caught...')
+        except Exception as e:
+            print(e)
+        else:
+            return "Course ADDED..."
